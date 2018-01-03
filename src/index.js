@@ -1,6 +1,20 @@
-import React from 'react'
-import ReactDOM from 'react-dom'
-import App from './App'
-import './index.css'
+import React from 'react';
+import ReactDOM from 'react-dom';
+import {BrowserRouter as Router, Route} from 'react-router-dom';
+import BooksApp from './BooksApp';
+import Search from './Components/Search';
+import './index.css';
 
-ReactDOM.render(<App />, document.getElementById('root'))
+const Root = () => {
+  return (
+    <Router> 
+    <div>
+      <Route path="/search" component={Search} />     
+      <Route exact path="/" component={BooksApp}/>
+    </div>
+    </Router>
+  );
+};
+
+
+ReactDOM.render(<Root />, document.getElementById('root'));
