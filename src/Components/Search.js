@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
-import {search} from '../BooksAPI';
+import PropTypes from 'prop-types';
+import {search as searchAPI} from '../BooksAPI';
 import Book from './Book';
-import {flatten} from '../utlility';
 
 class Search extends Component {
   state = {
@@ -13,26 +13,29 @@ class Search extends Component {
     let query = event.target.value.trim();
 
     if (query) {
-      search(query).then(searchResults => {
-        let onShelf = flatten(this.props.bookShelfStatus);
-
-        let filteredResults = searchResults.map(book => {
-          onShelf.forEach(shelfBook => {
-            if (book.id === shelfBook.id) {
-              book.shelf = shelfBook.shelf;
-            }
+      searchAPI(query)
+        .then(searchResults => {
+          let onShelf = this.props.books;
+          let filteredResults = searchResults.map(book => {
+            onShelf.forEach(shelfBook => {
+              if (book.id === shelfBook.id) {
+                book.shelf = shelfBook.shelf;
+              }
+            });
+            return book;
           });
-          return book;
-        });
 
-        this.setState({searchResults: filteredResults});
-      });
+          this.setState({searchResults: filteredResults});
+        })
+        .catch(error => {
+          alert(`no results for your query "${query}"`);
+        });
     } else this.setState({searchResults: []});
   };
 
   render() {
     let searchResults = this.state.searchResults;
-    console.log('RESULTS', searchResults);
+
     return (
       <div className="search-books">
         <div className="search-books-bar">
@@ -45,13 +48,14 @@ class Search extends Component {
         </div>
         <div className="search-books-results">
           <ol className="books-grid">
-            {searchResults &&
+            {searchResults.length > 0 &&
               searchResults.map(result => {
                 return (
-                  <li key={result && result.id ? result.id : undefined}>
-                    {' '}
-                    <Book changeShelf={this.props.changeShelf} book={result} />{' '}
-                  </li>
+                  <Book
+                    key={result && result.id ? result.id : undefined}
+                    changeShelf={this.props.changeShelf}
+                    book={result}
+                  />
                 );
               })}
           </ol>
@@ -60,5 +64,10 @@ class Search extends Component {
     );
   }
 }
+
+Search.propTypes = {
+  changeShelf: PropTypes.func,
+  books: PropTypes.array
+};
 
 export default Search;

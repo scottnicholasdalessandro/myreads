@@ -5,47 +5,27 @@ import Search from './Components/Search';
 import {BrowserRouter as Router, Route, Switch} from 'react-router-dom';
 import './App.css';
 
-// BooksAPI.update(book,shelf).then(() => {
-//   book.shelf = shelf;
-//   this.setState(state => ({
-//     books: state.books.filter(b => b.id !== book.id).concat([ book ])
-//   }))
-// })
-
-
-
 class BooksApp extends React.Component {
   state = {
-    bookShelfStatus: {}
+    books: []
   };
 
-  // may be able to refactor changeShelf, might be over complicated....
-  changeShelf = (book, newShelf) => {
+  changeShelf = (bookToChange, newShelf) => {
+    bookToChange.shelf = newShelf;
     this.setState(prevState => {
-      const oldShelf = book['shelf'] || 'none';
-      book.shelf = newShelf;
-
-      return {
-        bookShelfStatus: {
-          ...prevState.bookShelfStatus,
-          [oldShelf]: prevState.bookShelfStatus[oldShelf].filter(currentBook => book.id !== currentBook.id),
-          [newShelf]: prevState.bookShelfStatus[newShelf].concat([book])
-        }
-      };
+      const books = prevState.books.map(book => {
+        if (bookToChange.id === book.id) return bookToChange;
+        return book;
+      });
+      return {books};
     });
 
-    BooksAPI.update(book, newShelf);
+    BooksAPI.update(bookToChange, newShelf);
   };
 
   componentDidMount() {
     BooksAPI.getAll().then(books => {
-      let bookShelfStatus = {none:[]};
-      books.forEach(book => {
-        bookShelfStatus[book['shelf']]
-          ? bookShelfStatus[book['shelf']].push(book)
-          : (bookShelfStatus[book['shelf']] = [book]);
-      });
-      this.setState({bookShelfStatus});
+      this.setState({books});
     });
   }
 
@@ -54,12 +34,11 @@ class BooksApp extends React.Component {
       <div className="app">
         <Router>
           <Switch>
+            <Route exact path="/" render={() => <BookList books={this.state.books} changeShelf={this.changeShelf} />} />
             <Route
-              exact
-              path="/"
-              render={() => <BookList bookShelfStatus={this.state.bookShelfStatus} changeShelf={this.changeShelf} />}
+              path="/search"
+              render={() => <Search books={this.state.books} changeShelf={this.changeShelf} />}
             />
-            <Route path="/search" render={() => <Search bookShelfStatus={this.state.bookShelfStatus} changeShelf={this.changeShelf} />} />
           </Switch>
         </Router>
       </div>

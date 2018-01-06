@@ -1,36 +1,42 @@
-import React, {Component} from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import BookShelf from './BookShelf';
 import {Link} from 'react-router-dom';
 
-class BookList extends Component {
-  render() {
-    let bookShelfStatus = this.props.bookShelfStatus;
-    return (
-      <div>
-        <div className="list-books">
-          <div className="list-books-title">
-            <h1>MyReads</h1>
-          </div>
-          <div className="list-books-content">
-            {bookShelfStatus && (
-              <div>
-                <BookShelf
-                  name={'Currently Reading'}
-                  changeShelf={this.props.changeShelf}
-                  books={bookShelfStatus['currentlyReading']}
-                />
-                <BookShelf name={'Want to Read'} changeShelf={this.props.changeShelf} books={bookShelfStatus['wantToRead']} />
-                <BookShelf name={'Read'} changeShelf={this.props.changeShelf} books={bookShelfStatus['read']} />
-              </div>
-            )}
-          </div>
+function BookList(props) {
+  const {books, changeShelf} = props;
+
+  return (
+    <div>
+      <div className="list-books">
+        <div className="list-books-title">
+          <h1>MyReads</h1>
         </div>
-        <div className="open-search">
-          <Link to="/search">Add a book</Link>
+        <div className="list-books-content">
+          {books && (
+            <div>
+              <BookShelf
+                name={'Currently Reading'}
+                changeShelf={changeShelf}
+                books={books}
+                shelf={'currentlyReading'}
+              />
+              <BookShelf name={'Want to Read'} changeShelf={changeShelf} books={books} shelf={'wantToRead'} />
+              <BookShelf name={'Read'} changeShelf={changeShelf} books={books} shelf={'read'} />
+            </div>
+          )}
         </div>
       </div>
-    );
-  }
+      <div className="open-search">
+        <Link to="/search">Add a book</Link>
+      </div>
+    </div>
+  );
 }
+
+BookList.propTypes = {
+  changeShelf: PropTypes.func,
+  books: PropTypes.array
+};
 
 export default BookList;
